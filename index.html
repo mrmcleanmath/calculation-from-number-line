@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Write the Calculation from a Number Line</title>
+<style>
+  :root{
+    --bg:#ffffff; --fg:#111111; --card:#f7f7f9; --muted:#666;
+    --pos:#0b57d0; --neg:#c0392b; --zero:#111; --arrow:#c0392b;
+    --ok:#1b8f2e; --bad:#c62828; --accent:#0b57d0;
+  }
+  body{margin:0; padding:16px; font-family:Arial,Helvetica,sans-serif; background:var(--bg); color:var(--fg);}
+  h1{margin:0 0 12px; font-size:clamp(20px,3.2vw,28px);}
+  .row{display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:8px 0;}
+  select,button{font-size:16px;}
+  button{padding:8px 14px; border:1px solid #bbb; background:#fff; border-radius:10px; cursor:pointer}
+  button:hover{border-color:#888}
+  .pill{padding:6px 10px; border-radius:999px; background:#eee; font-size:14px;}
+  .wrap{border:1px solid #ddd; border-radius:14px; background:#fff; padding:14px; margin-top:12px;}
+  .center{display:flex; justify-content:center;}
+  .options{display:grid; gap:10px; margin-top:10px;}
+  @media (min-width:700px){ .options{grid-template-columns:repeat(2,1fr);} }
+  .opt{padding:10px 12px; border:1px solid #cfcfcf; border-radius:12px; text-align:center; cursor:pointer; background:#fafafa;}
+  .opt:focus{outline:3px solid #91b7ff;}
+  .opt.correct{border-color:var(--ok)}
+  .opt.wrong{border-color:var(--bad)}
+  .eq{font-size:22px;}
+  .feedback{min-height:1.6em; font-weight:700; margin-top:8px;}
+  .feedback.ok{color:var(--ok)} .feedback.bad{color:var(--bad)}
+  .steps{display:none; margin-top:8px; background:var(--card); border-radius:12px; padding:10px 12px;}
+  .summary{margin-top:10px; font-size:14px; color:var(--muted);}
+  .svgbox{max-width:860px; margin:0 auto;}
+  .smallNote{font-size:12px; color:var(--muted);}
+
+  /* Worksheet — vertical, full width */
+  #worksheetArea{display:none;}
+  #columns{display:flex; flex-direction:column; gap:14px;}
+  .card{border:1px solid #e2e2e2; border-radius:12px; background:#fafafa; padding:10px 12px; width:100%;}
+  .card h3{margin:0 0 6px; font-size:16px;}
+  .card .a{display:none; font-weight:600; margin-top:6px;}
+  .card .btns{margin-top:8px;}
+  .card .svgbox{max-width:none; margin:0;}
+
+  footer{margin-top:22px; opacity:.8;}
+
+  /* High-contrast */
+  .hi-contrast{
+    --bg:#000; --fg:#fff; --card:#0b0b0b; --muted:#bbb;
+    --pos:#8ab4ff; --neg:#ff8a8a; --zero:#fff; --arrow:#ffd400;
+    --ok:#7CFC00; --bad:#ff5252; --accent:#ffd400;
+  }
+  .hi-contrast button, .hi-contrast select{background:#111;color:#fff;border-color:#666}
+
+  .sr{position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden;}
+</style>
+</head>
+<body>
+  <h1>Write the Calculation from a Number Line</h1>
+
+  <div class="row">
+    <label>Mode:
+      <select id="modeSelect" aria-label="Mode">
+        <option value="game">Game Mode (MC)</option>
+        <option value="worksheet">Worksheet Mode</option>
+      </select>
+    </label>
+    <label>Difficulty:
+      <select id="diffSelect" aria-label="Difficulty">
+        <option value="easy">🟢 Easy</option>
+        <option value="medium">🟡 Medium</option>
+        <option value="hard">🔴 Hard</option>
+        <option value="mixed">🎲 Mixed</option>
+      </select>
+    </label>
+    <button id="contrastBtn" aria-pressed="false" onclick="toggleContrast()">High Contrast</button>
+    <button id="soundBtn" aria-pressed="true" onclick="toggleSound()">Sound: On</button>
+    <span class="pill">Keyboard: 1–4 choose • Enter submit • N next • Esc clear</span>
+  </div>
+
+  <!-- Game -->
+  <section id="gameArea" class="wrap" role="region" aria-label="Game area">
+    <div id="lineBox" class="svgbox center" aria-live="polite"></div>
+    <div class="options" id="options"></div>
+    <div class="row center">
+      <button onclick="submitMC()">Submit (Enter)</button>
+      <button onclick="nextProblem()">Next (N)</button>
+      <button onclick="clearChoice()">Clear (Esc)</button>
+    </div>
+    <div id="feedback" class="feedback" aria-live="polite"></div>
+    <div id="steps" class="steps"></div>
+    <div id="summary" class="summary"></div>
+  </section>
+
+  <!-- Worksheet -->
+  <section id="worksheetArea" class="wrap" role="region" aria-label="Worksheet area">
+    <p>Look at the number line and write the calculation that matches the arrow. Each card can be revealed individually, or use Reveal All / Hide All.</p>
+    <div class="row">
+      <label>Set size:
+        <select id="wsSize">
+          <option>5</option><option selected>10</option><option>15</option>
+        </select>
+      </label>
+      <button onclick="generateWorksheet()">Generate</button>
+      <button onclick="revealAll()">Reveal All</button>
+      <button onclick="hideAll()">Hide All</button>
+      <span class="smallNote">Vertical cards—show 3–4 at a time on projector.</span>
+    </div>
+    <div id="columns"></div>
+  </section>
+
+  <footer>Created by Mr. McLean Math</footer>
+
+  <div id="live" class="sr" aria-live="polite"></div>
+
+<script>
+/* ========= Helpers ========= */
+const randInt = (a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+
+function beep(success=true){
+  if(!soundOn) return;
+  const ctx = new (window.AudioContext||window.webkitAudioContext)();
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.connect(g); g.connect(ctx.destination);
+  o.type = 'sine'; o.frequency.value = success ? 880 : 220;
+  g.gain.value = 0.001; g.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime+0.01);
+  o.start();
+  setTimeout(()=>{ g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+0.09); o.stop(ctx.currentTime+0.1); }, 90);
+}
+
+/* ========= Problem generation ========= */
+function tierSettings(diff){
+  if(diff==='easy')   return {min:-10,max:10, minStep:1,maxStep:6, crossProb:0.2, capStep1:0.3};
+  if(diff==='medium') return {min:-15,max:15, minStep:3,maxStep:10, crossProb:0.4, capStep1:0};
+  if(diff==='hard')   return {min:-20,max:20, minStep:6,maxStep:15, crossProb:0.6, capStep1:0};
+  return tierSettings(['easy','medium','hard'][randInt(0,2)]);
+}
+function genProblem(diff){
+  const t = tierSettings(diff);
+  let s, c, e, tries=0;
+  const wantCross = Math.random() < t.crossProb;
+  while(true){
+    tries++; if(tries>500) break;
+    let step = randInt(t.minStep, t.maxStep);
+    if(step===1 && Math.random()>t.capStep1) step = Math.min(t.maxStep, Math.max(2, step+randInt(0,2)));
+    const dir = Math.random()<0.5 ? -1 : 1;
+    c = dir*step;
+    s = randInt(t.min, t.max);
+    e = s + c;
+    if(e < t.min || e > t.max) continue;
+    const crosses = (s*e<=0 && s!==e);
+    if(wantCross && !crosses) continue;
+    if(!wantCross && crosses) continue;
+    if(c===0) continue;
+    break;
+  }
+  return {min:t.min,max:t.max, s, c, e};
+}
+
+/* ========= Equation formatting ========= */
+function formatEqA(s,c,e){ const mag = Math.abs(c); const op = c>=0 ? '+' : '−'; return `${s} ${op} ${mag} = ${e}`; }
+function formatEqB(s,c,e){ const signed = (c>=0?'+':'−') + Math.abs(c); return `${s} + (${signed}) = ${e}`; }
+
+/* ========= SVG Number line (bigger labels/thicker lines) ========= */
+function numberLineSVG(prob, width=820, height=160, responsive=false, labelSize=18){
+  const {min,max,s,e} = prob;
+  const padL=40, padR=40;
+  const baseW = responsive ? 1024 : width;
+  const baseH = responsive ? 180  : height;
+
+  const L = padL, R = baseW - padR, Y = Math.round(baseH/2)+12;
+  const scale = (x)=> L + ((x-min)/(max-min))*(R-L);
+  const sX = scale(s), eX = scale(e);
+  const dir = eX>=sX ? 1 : -1;
+
+  let labels = '';
+  for(let v=min; v<=max; v++){
+    const x=scale(v);
+    const color = v===0? 'var(--zero)' : (v<0? 'var(--neg)' : 'var(--pos)');
+    const tickH = v===0 ? 16 : 12;
+    labels += `
+      <line x1="${x}" y1="${Y-tickH/2}" x2="${x}" y2="${Y+tickH/2}" stroke="${color}" stroke-width="${v===0?3:2}"/>
+      <text x="${x}" y="${Y+28}" text-anchor="middle" font-size="${labelSize}" fill="${color}" font-weight="${v===0?'700':'500'}">${v}</text>
+    `;
+  }
+
+  const arrowPath = (x1,y1,x2,y2)=>{
+    const midX=(x1+x2)/2, cY=y1-26;
+    return `M ${x1} ${y1} Q ${midX} ${cY} ${x2} ${y2}`;
+  };
+  const pathStr = arrowPath(sX,Y-8,eX,Y-8);
+
+  if(responsive){
+    return `
+    <svg width="100%" height="${baseH}" viewBox="0 0 ${baseW} ${baseH}" preserveAspectRatio="xMidYMid meet"
+         role="img" aria-label="Number line from ${min} to ${max} with arrow from ${s} to ${e}">
+      <line x1="${L}" y1="${Y}" x2="${R}" y2="${Y}" stroke="#555" stroke-width="3" />
+      ${labels}
+      <path d="${pathStr}" fill="none" stroke="var(--arrow)" stroke-width="5" />
+      <path d="M ${eX} ${Y-8} l ${dir>=0?-10:10} -5 l 0 10 Z" fill="var(--arrow)" />
+    </svg>`;
+  } else {
+    return `
+    <svg width="${baseW}" height="${baseH}" role="img" aria-label="Number line from ${min} to ${max} with arrow from ${s} to ${e}">
+      <line x1="${L}" y1="${Y}" x2="${R}" y2="${Y}" stroke="#555" stroke-width="3" />
+      ${labels}
+      <path d="${pathStr}" fill="none" stroke="var(--arrow)" stroke-width="5" />
+      <path d="M ${eX} ${Y-8} l ${dir>=0?-10:10} -5 l 0 10 Z" fill="var(--arrow)" />
+    </svg>`;
+  }
+}
+
+/* ========= MC options ========= */
+function buildMC(prob){
+  const {s,c,e} = prob;
+  const correctForm = Math.random()<0.5 ? 'A' : 'B';
+  const correctStr = correctForm==='A' ? formatEqA(s,c,e) : formatEqB(s,c,e);
+
+  const opts = new Set([correctStr]);
+
+  const d1 = correctForm==='A' ? formatEqA(s,-c,e) : formatEqB(s,-c,e);
+  if(!opts.has(d1)) opts.add(d1);
+
+  const near = e + (c>0?-1:1);
+  const d2 = (Math.random()<0.5)
+    ? (correctForm==='A' ? formatEqA(s,Math.abs(c),near) : formatEqB(s,c,near))
+    : (correctForm==='A' ? formatEqA(s,Math.max(1,Math.abs(c)-1)*(c>=0?1:-1),e) : formatEqB(s,(c>=0?1:-1)*Math.max(1,Math.abs(c)-1),e));
+  if(!opts.has(d2)) opts.add(d2);
+
+  const d3 = correctForm==='A' ? formatEqA(e,Math.abs(c),s) : formatEqB(e,c*-1,s);
+  if(!opts.has(d3)) opts.add(d3);
+
+  while(opts.size<4){
+    const tweak = c*(Math.random()<0.5?-1:1) + (Math.random()<0.5?1:-1);
+    const d = correctForm==='A' ? formatEqA(s,tweak,e) : formatEqB(s,tweak,e);
+    if(!opts.has(d)) opts.add(d);
+  }
+
+  const all = Array.from(opts);
+  for(let i=all.length-1;i>0;i--){ const j=randInt(0,i); [all[i],all[j]]=[all[j],all[i]]; }
+  const correctIndex = all.indexOf(correctStr);
+  return {choices:all, correctIndex, form:correctForm};
+}
+
+/* ========= Game state & UI ========= */
+let current=null, mc=null, selectedIndex=null;
+let stats = {answered:0, correct:0, streak:0, best:0, score:0};
+let soundOn = true;
+
+function renderProblem(){
+  const diff = document.getElementById('diffSelect').value;
+  current = genProblem(diff);
+  mc = buildMC(current);
+  selectedIndex = null;
+
+  // Bigger labels in game too
+  document.getElementById('lineBox').innerHTML = numberLineSVG(current, 860, 180, false, 18);
+  const optBox = document.getElementById('options'); optBox.innerHTML='';
+  mc.choices.forEach((text,idx)=>{
+    const btn = document.createElement('button');
+    btn.className='opt'; btn.setAttribute('data-idx',idx);
+    btn.innerHTML = `<span class="eq">${text.replaceAll('-', '−')}</span>`;
+    btn.addEventListener('click',()=>selectOption(idx,btn));
+    btn.addEventListener('keydown',(e)=>{ if(e.key==='Enter'){ selectOption(idx,btn); }});
+    optBox.appendChild(btn);
+  });
+  document.getElementById('feedback').textContent='';
+  document.getElementById('feedback').className='feedback';
+  document.getElementById('steps').style.display='none';
+  updateSummary();
+}
+function selectOption(idx,btn){
+  selectedIndex = idx;
+  document.querySelectorAll('.opt').forEach(el=>el.style.outline='');
+  btn.style.outline='3px solid #91b7ff';
+}
+function submitMC(){
+  if(selectedIndex==null){ announce('Choose an option first'); return; }
+  const correct = selectedIndex===mc.correctIndex;
+  const fb = document.getElementById('feedback');
+  document.querySelectorAll('.opt').forEach((el,i)=>{
+    el.classList.remove('correct','wrong');
+    if(i===mc.correctIndex) el.classList.add('correct');
+    if(i===selectedIndex && !correct) el.classList.add('wrong');
+  });
+  if(correct){
+    stats.answered++; stats.correct++; stats.streak++; stats.best=Math.max(stats.best,stats.streak); stats.score+=10;
+    fb.textContent='✔ Correct!'; fb.className='feedback ok'; beep(true);
+  }else{
+    stats.answered++; stats.streak=0;
+    fb.textContent='✖ Incorrect.'; fb.className='feedback bad'; beep(false);
+    showSteps();
+  }
+  updateSummary();
+}
+function nextProblem(){ renderProblem(); }
+function clearChoice(){
+  selectedIndex=null;
+  document.querySelectorAll('.opt').forEach(el=>el.style.outline='');
+}
+function updateSummary(){
+  const {answered,correct,streak,best,score}=stats;
+  const acc = answered? Math.round(100*correct/answered):0;
+  document.getElementById('summary').textContent =
+    `Answered: ${answered} • Correct: ${correct} • Accuracy: ${acc}% • Streak: ${streak} (Best ${best}) • Score: ${score}`;
+}
+function showSteps(){
+  const box = document.getElementById('steps');
+  const s=current.s, c=current.c, e=current.e;
+  const a = formatEqA(s,c,e), b = formatEqB(s,c,e);
+  const dir = c>0?'right (+)':'left (−)';
+  box.innerHTML = `
+    <strong>Show Steps</strong>
+    <ol>
+      <li><b>Start</b> at <b>${s}</b> (tail of the arrow).</li>
+      <li>Move ${Math.abs(c)} steps to the <b>${dir}</b>.</li>
+      <li>End at <b>${e}</b>.</li>
+      <li>Write the equation (either form):<br>
+        • Form A: <code>${a}</code><br>
+        • Form B: <code>${b}</code>
+      </li>
+    </ol>`;
+  box.style.display='block';
+}
+function toggleContrast(){
+  const pressed = document.body.classList.toggle('hi-contrast');
+  document.getElementById('contrastBtn').setAttribute('aria-pressed', pressed?'true':'false');
+}
+function toggleSound(){
+  soundOn = !soundOn;
+  document.getElementById('soundBtn').textContent = 'Sound: ' + (soundOn?'On':'Off');
+  document.getElementById('soundBtn').setAttribute('aria-pressed', soundOn?'true':'false');
+}
+function announce(msg){ const live=document.getElementById('live'); live.textContent=''; setTimeout(()=>live.textContent=msg, 10); }
+
+/* ========= Keyboard shortcuts ========= */
+document.addEventListener('keydown', (e)=>{
+  const k=e.key;
+  if(k==='1'||k==='2'||k==='3'||k==='4'){
+    const idx=parseInt(k,10)-1;
+    const btn=document.querySelector(`.opt[data-idx="${idx}"]`);
+    if(btn) selectOption(idx,btn);
+  }
+  if(k==='Enter'){ submitMC(); }
+  if(k==='n' || k==='N'){ nextProblem(); }
+  if(k==='Escape'){ clearChoice(); }
+});
+
+/* ========= Worksheet mode (vertical, full-width) ========= */
+function generateWorksheet(){
+  const size = parseInt(document.getElementById('wsSize').value,10);
+  const diff = document.getElementById('diffSelect').value;
+  const container = document.getElementById('columns'); container.innerHTML='';
+
+  for(let i=1;i<=size;i++){
+    const prob = genProblem(diff);
+    const card = document.createElement('div');
+    card.className='card';
+
+    const eqA = formatEqA(prob.s,prob.c,prob.e);
+    const eqB = formatEqB(prob.s,prob.c,prob.e);
+
+    // Bigger worksheet labels (20px)
+    card.innerHTML = `
+      <h3>${i}.</h3>
+      <div class="svgbox">${numberLineSVG(prob, 1024, 180, true, 20)}</div>
+      <div class="btns"><button aria-expanded="false">Reveal</button></div>
+      <div class="a">Form A: <code>${eqA}</code><br>Form B: <code>${eqB}</code></div>
+    `;
+    const btn = card.querySelector('button');
+    const ans = card.querySelector('.a');
+    btn.addEventListener('click', ()=>{
+      const show = ans.style.display==='block';
+      ans.style.display = show?'none':'block';
+      btn.textContent = show?'Reveal':'Hide';
+      btn.setAttribute('aria-expanded',(!show).toString());
+    });
+    container.appendChild(card);
+  }
+}
+function revealAll(){ document.querySelectorAll('#columns .a').forEach(el=>el.style.display='block'); document.querySelectorAll('#columns button').forEach(b=>b.textContent='Hide'); }
+function hideAll(){ document.querySelectorAll('#columns .a').forEach(el=>el.style.display='none'); document.querySelectorAll('#columns button').forEach(b=>b.textContent='Reveal'); }
+
+/* ========= Mode switching ========= */
+document.getElementById('modeSelect').addEventListener('change', ()=>{
+  const m = document.getElementById('modeSelect').value;
+  if(m==='worksheet'){
+    document.getElementById('gameArea').style.display='none';
+    document.getElementById('worksheetArea').style.display='block';
+  }else{
+    document.getElementById('worksheetArea').style.display='none';
+    document.getElementById('gameArea').style.display='block';
+    renderProblem();
+  }
+});
+
+/* ========= Dev tests (enable with ?dev=1) ========= */
+(function dev(){
+  const p = new URLSearchParams(location.search);
+  if(!p.get('dev')) return;
+  const tests=[];
+  for(let i=0;i<50;i++){ const pr=genProblem('mixed'); tests.push(pr.s>=pr.min && pr.s<=pr.max && pr.e>=pr.min && pr.e<=pr.max); }
+  for(let i=0;i<20;i++){ const pr=genProblem('mixed'), m=buildMC(pr); tests.push(m.choices.length===4 && m.correctIndex>=0); }
+  const pr=genProblem('easy'); const svg=numberLineSVG(pr,1024,180,true,20); tests.push(svg.includes('viewBox'));
+  console.log('DEV TESTS:', tests.every(Boolean)?'✅ PASS':'❌ FAIL', tests);
+})();
+
+/* ========= Init ========= */
+renderProblem();
+</script>
+</body>
+</html>
