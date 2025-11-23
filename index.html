@@ -94,7 +94,7 @@
 
   <!-- Worksheet -->
   <section id="worksheetArea" class="wrap" role="region" aria-label="Worksheet area">
-    <p>Look at the number line and write the calculation that matches the arrow. Each card can be revealed individually, or use Reveal All / Hide All.</p>
+    <p>Look at the number line and write the calculation that matches the arrow.</p>
     <div class="row">
       <label>Set size:
         <select id="wsSize">
@@ -159,10 +159,13 @@ function genProblem(diff){
 }
 
 /* ========= Equation formatting ========= */
-function formatEqA(s,c,e){ const mag = Math.abs(c); const op = c>=0 ? '+' : '−'; return `${s} ${op} ${mag} = ${e}`; }
-function formatEqB(s,c,e){ const signed = (c>=0?'+':'−') + Math.abs(c); return `${s} + (${signed}) = ${e}`; }
+function formatEqSimple(s,c,e){
+  const mag = Math.abs(c);
+  const op = c>=0 ? '+' : '−';
+  return `${s} ${op} ${mag} = ${e}`;
+}
 
-/* ========= SVG Number line (bigger labels/thicker lines) ========= */
+/* ========= SVG Number line ========= */
 function numberLineSVG(prob, width=820, height=160, responsive=false, labelSize=18){
   const {min,max,s,e} = prob;
   const padL=40, padR=40;
@@ -211,36 +214,40 @@ function numberLineSVG(prob, width=820, height=160, responsive=false, labelSize=
   }
 }
 
-/* ========= MC options ========= */
+/* ========= MC options (simple form only) ========= */
 function buildMC(prob){
   const {s,c,e} = prob;
-  const correctForm = Math.random()<0.5 ? 'A' : 'B';
-  const correctStr = correctForm==='A' ? formatEqA(s,c,e) : formatEqB(s,c,e);
 
+  // Correct answer in simple Year 7 style: start ± steps = end
+  const correctStr = formatEqSimple(s,c,e);
   const opts = new Set([correctStr]);
 
-  const d1 = correctForm==='A' ? formatEqA(s,-c,e) : formatEqB(s,-c,e);
+  // 1. Same start/end but wrong direction sign
+  const d1 = formatEqSimple(s,-c,e);
   if(!opts.has(d1)) opts.add(d1);
 
+  // 2. Slightly wrong end or step size
   const near = e + (c>0?-1:1);
   const d2 = (Math.random()<0.5)
-    ? (correctForm==='A' ? formatEqA(s,Math.abs(c),near) : formatEqB(s,c,near))
-    : (correctForm==='A' ? formatEqA(s,Math.max(1,Math.abs(c)-1)*(c>=0?1:-1),e) : formatEqB(s,(c>=0?1:-1)*Math.max(1,Math.abs(c)-1),e));
+    ? formatEqSimple(s,Math.abs(c),near)                         // wrong end
+    : formatEqSimple(s,(c>=0?1:-1)*Math.max(1,Math.abs(c)-1),e); // wrong step
   if(!opts.has(d2)) opts.add(d2);
 
-  const d3 = correctForm==='A' ? formatEqA(e,Math.abs(c),s) : formatEqB(e,c*-1,s);
+  // 3. Swap start/end or reverse thinking
+  const d3 = formatEqSimple(e,c*-1,s);
   if(!opts.has(d3)) opts.add(d3);
 
+  // 4. Fill with more simple-style variations if needed
   while(opts.size<4){
     const tweak = c*(Math.random()<0.5?-1:1) + (Math.random()<0.5?1:-1);
-    const d = correctForm==='A' ? formatEqA(s,tweak,e) : formatEqB(s,tweak,e);
+    const d = formatEqSimple(s,tweak,e);
     if(!opts.has(d)) opts.add(d);
   }
 
   const all = Array.from(opts);
   for(let i=all.length-1;i>0;i--){ const j=randInt(0,i); [all[i],all[j]]=[all[j],all[i]]; }
   const correctIndex = all.indexOf(correctStr);
-  return {choices:all, correctIndex, form:correctForm};
+  return {choices:all, correctIndex};
 }
 
 /* ========= Game state & UI ========= */
@@ -254,7 +261,6 @@ function renderProblem(){
   mc = buildMC(current);
   selectedIndex = null;
 
-  // Bigger labels in game too
   document.getElementById('lineBox').innerHTML = numberLineSVG(current, 860, 180, false, 18);
   const optBox = document.getElementById('options'); optBox.innerHTML='';
   mc.choices.forEach((text,idx)=>{
@@ -308,7 +314,7 @@ function updateSummary(){
 function showSteps(){
   const box = document.getElementById('steps');
   const s=current.s, c=current.c, e=current.e;
-  const a = formatEqA(s,c,e), b = formatEqB(s,c,e);
+  const eq = formatEqSimple(s,c,e);
   const dir = c>0?'right (+)':'left (−)';
   box.innerHTML = `
     <strong>Show Steps</strong>
@@ -316,10 +322,7 @@ function showSteps(){
       <li><b>Start</b> at <b>${s}</b> (tail of the arrow).</li>
       <li>Move ${Math.abs(c)} steps to the <b>${dir}</b>.</li>
       <li>End at <b>${e}</b>.</li>
-      <li>Write the equation (either form):<br>
-        • Form A: <code>${a}</code><br>
-        • Form B: <code>${b}</code>
-      </li>
+      <li>Write the equation: <code>${eq}</code></li>
     </ol>`;
   box.style.display='block';
 }
@@ -358,15 +361,14 @@ function generateWorksheet(){
     const card = document.createElement('div');
     card.className='card';
 
-    const eqA = formatEqA(prob.s,prob.c,prob.e);
-    const eqB = formatEqB(prob.s,prob.c,prob.e);
+    const eq = formatEqSimple(prob.s,prob.c,prob.e);
 
     // Bigger worksheet labels (20px)
     card.innerHTML = `
       <h3>${i}.</h3>
       <div class="svgbox">${numberLineSVG(prob, 1024, 180, true, 20)}</div>
       <div class="btns"><button aria-expanded="false">Reveal</button></div>
-      <div class="a">Form A: <code>${eqA}</code><br>Form B: <code>${eqB}</code></div>
+      <div class="a">Answer: <code>${eq}</code></div>
     `;
     const btn = card.querySelector('button');
     const ans = card.querySelector('.a');
@@ -379,8 +381,14 @@ function generateWorksheet(){
     container.appendChild(card);
   }
 }
-function revealAll(){ document.querySelectorAll('#columns .a').forEach(el=>el.style.display='block'); document.querySelectorAll('#columns button').forEach(b=>b.textContent='Hide'); }
-function hideAll(){ document.querySelectorAll('#columns .a').forEach(el=>el.style.display='none'); document.querySelectorAll('#columns button').forEach(b=>b.textContent='Reveal'); }
+function revealAll(){
+  document.querySelectorAll('#columns .a').forEach(el=>el.style.display='block');
+  document.querySelectorAll('#columns button').forEach(b=>b.textContent='Hide');
+}
+function hideAll(){
+  document.querySelectorAll('#columns .a').forEach(el=>el.style.display='none');
+  document.querySelectorAll('#columns button').forEach(b=>b.textContent='Reveal');
+}
 
 /* ========= Mode switching ========= */
 document.getElementById('modeSelect').addEventListener('change', ()=>{
@@ -400,9 +408,17 @@ document.getElementById('modeSelect').addEventListener('change', ()=>{
   const p = new URLSearchParams(location.search);
   if(!p.get('dev')) return;
   const tests=[];
-  for(let i=0;i<50;i++){ const pr=genProblem('mixed'); tests.push(pr.s>=pr.min && pr.s<=pr.max && pr.e>=pr.min && pr.e<=pr.max); }
-  for(let i=0;i<20;i++){ const pr=genProblem('mixed'), m=buildMC(pr); tests.push(m.choices.length===4 && m.correctIndex>=0); }
-  const pr=genProblem('easy'); const svg=numberLineSVG(pr,1024,180,true,20); tests.push(svg.includes('viewBox'));
+  for(let i=0;i<50;i++){
+    const pr=genProblem('mixed');
+    tests.push(pr.s>=pr.min && pr.s<=pr.max && pr.e>=pr.min && pr.e<=pr.max);
+  }
+  for(let i=0;i<20;i++){
+    const pr=genProblem('mixed'), m=buildMC(pr);
+    tests.push(m.choices.length===4 && m.correctIndex>=0);
+  }
+  const pr=genProblem('easy');
+  const svg=numberLineSVG(pr,1024,180,true,20);
+  tests.push(svg.includes('viewBox'));
   console.log('DEV TESTS:', tests.every(Boolean)?'✅ PASS':'❌ FAIL', tests);
 })();
 
