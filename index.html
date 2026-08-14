@@ -4,52 +4,57 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Write the Calculation from a Number Line – Mr. McLean Math</title>
+<title>Comparing Numbers – Mr. McLean Math</title>
 <style>
 :root{
-  --bg:#fff;--fg:#111;--card:#f7f7f9;--muted:#666;--pos:#0b57d0;--neg:#c0392b;
-  --zero:#111;--arrow:#c0392b;--ok:#1b8f2e;--bad:#c62828;--border:#ddd;--accent:#0b57d0;
+  --bg:#0b1226;--card:#101828;--text:#e5e7eb;--muted:#9ca3af;--line:#1f2937;
+  --accent:#38bdf8;--ok:#22c55e;--bad:#ef4444;--tile:#142548;--tileHover:#1d305c;
+  --slot:#0f1a30;--slotActive:#14304f;--shadow:0 10px 30px rgba(0,0,0,.3);
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 Arial,Helvetica,sans-serif}
-.wrap{max-width:920px;margin:0 auto;padding:20px 14px 28px}
+body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,#0b1226,#0e1533 70%);color:var(--text)}
+.wrap{max-width:920px;margin:0 auto;padding:18px 14px 28px}
 header{display:flex;justify-content:space-between;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px}
 h1{margin:0;font-size:clamp(24px,3vw,34px)}
 .subtitle{margin-top:5px;color:var(--muted);font-size:14px}
 .tabs,.levels,.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-button{font:inherit;border:1px solid #bbb;background:#fff;border-radius:10px;padding:9px 13px;font-weight:700;cursor:pointer}
-button.active,button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+button{font:inherit;background:#0f172a;color:var(--text);border:1px solid var(--line);border-radius:11px;padding:9px 12px;font-weight:800;cursor:pointer}
+button.active,button.primary{background:#0c1b3a;border-color:#2a4c78}
 button:disabled{opacity:.5;cursor:not-allowed}
-.card{border:1px solid var(--border);border-radius:14px;background:#fff;padding:15px}
-.toolbar{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.card{background:linear-gradient(180deg,#0f172a,#0b1226);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
+.toolbar{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
 .label{font-size:12px;color:var(--muted);font-weight:800;margin-bottom:6px}
-.svgbox{max-width:860px;margin:0 auto}
-.options{display:grid;gap:10px;margin-top:12px}
-@media(min-width:700px){.options{grid-template-columns:1fr 1fr}}
-.opt{padding:11px 12px;border:1px solid #cfcfcf;border-radius:12px;text-align:center;background:#fafafa;cursor:pointer}
-.opt.selected{outline:3px solid #91b7ff}
-.opt.correct{border-color:var(--ok);background:#f2fbf4}
-.opt.wrong{border-color:var(--bad);background:#fff3f3}
-.eq{font-size:21px}
-.controls{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:12px}
-.feedback{min-height:48px;margin-top:10px;padding:10px 12px;border-radius:10px;background:#fafafa}
-.feedback.ok{color:var(--ok);font-weight:800}.feedback.bad{color:var(--bad);font-weight:800}
-.steps{display:none;margin-top:8px;background:var(--card);border-radius:12px;padding:10px 12px;line-height:1.55}
+.bigRow{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin-top:10px}
+.numBox{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:clamp(32px,5vw,52px);text-align:center;padding:12px 8px;border:1px solid #2a3a73;border-radius:14px;background:#0f1a30;min-height:76px;display:flex;align-items:center;justify-content:center;white-space:pre}
+.slot{min-width:88px;min-height:88px;display:flex;align-items:center;justify-content:center;font-size:clamp(30px,5vw,48px);border:2px dashed #3b475a;border-radius:16px;background:var(--slot);padding:8px 12px}
+.slot.active{border-color:var(--accent);background:var(--slotActive)}
+.rackWrap{margin-top:12px}.rackTitle{color:#cbd5e1;font-size:14px;margin-bottom:6px;font-weight:800}.rack{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.chip{padding:12px 16px;min-width:72px;font-size:36px;line-height:1;display:inline-flex;align-items:center;justify-content:center;background:var(--tile);border:1px solid #2a3a73;border-radius:12px;color:#fff;cursor:grab}
+.chip:hover{background:var(--tileHover)}
+.controls{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+.feedback{display:none;margin-top:12px;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:#0c162a}
+.feedback.ok{display:block;border-color:#134e4a;background:#052e2b}.feedback.bad{display:block;border-color:#4c1d1d;background:#2a0c0c}
+.steps{display:none;margin-top:10px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;line-height:1.5;color:#cbd5e1}
 .stats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
-.stat{padding:7px 11px;border:1px solid var(--border);border-radius:999px;font-size:13px;font-weight:800}
+.stat{padding:7px 11px;border:1px solid var(--line);border-radius:999px;font-size:13px;font-weight:800}
 .worksheet{display:none}
 .ws-top{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
-select{font:inherit;border:1px solid #bbb;border-radius:10px;padding:9px 10px;background:#fff}
-#columns{display:flex;flex-direction:column;gap:14px}
-.wcard{border:1px solid #e2e2e2;border-radius:12px;background:#fafafa;padding:10px 12px}
-.wcard h3{margin:0 0 6px;font-size:16px}
-.wans{display:none;font-weight:700;margin-top:6px}.wans.show{display:block}
+select{font:inherit;background:#0f172a;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:9px 10px}
+.wgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.wcard{position:relative;border:1px solid #334155;border-radius:12px;background:#0f1a30;padding:12px}
+.wlabel{position:absolute;top:8px;left:10px;font-size:13px;color:#cbd5e1}
+.wPair{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;margin:12px 0 8px}
+.wNum{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:clamp(26px,4vw,36px);text-align:center;padding:4px 6px;border:1px solid #2a3a73;border-radius:10px;background:#101c39}
+.wSign{font-size:clamp(28px,4vw,42px);opacity:.7}
+.wans{display:none;border-top:1px dashed #334155;padding-top:8px;color:#cbd5e1}.wans.show{display:block}
 .footer{text-align:center;color:var(--muted);font-size:12px;margin-top:14px}
+@media(max-width:700px){.wgrid{grid-template-columns:1fr}}
+@media(max-width:560px){.bigRow{grid-template-columns:1fr}.slot{justify-self:center}.wPair{grid-template-columns:1fr auto 1fr}}
 @media print{
-  body{background:#fff}.wrap{max-width:none;padding:0}
+  body{background:#fff;color:#000}.wrap{max-width:none;padding:0}
   header,#practiceCard,.no-print,.footer{display:none!important}
-  #worksheetCard{display:block!important;border:0;padding:0}
-  .wans{display:none!important}
+  #worksheetCard{display:block!important;background:#fff;color:#000;border:0;box-shadow:none;padding:0}
+  .wgrid{grid-template-columns:repeat(2,1fr)}.wcard{background:#fff;color:#000;border-color:#000}.wans{display:none!important}
 }
 </style>
 </head>
@@ -57,8 +62,8 @@ select{font:inherit;border:1px solid #bbb;border-radius:10px;padding:9px 10px;ba
 <div class="wrap">
 <header>
   <div>
-    <h1>Write the Calculation from a Number Line</h1>
-    <div class="subtitle">Match the arrow to the correct calculation.</div>
+    <h1>Comparing Numbers</h1>
+    <div class="subtitle">Choose &gt;, &lt;, or = to make the comparison true.</div>
   </div>
   <div class="tabs">
     <button id="practiceTab" class="active" type="button">Practice</button>
@@ -79,8 +84,16 @@ select{font:inherit;border:1px solid #bbb;border-radius:10px;padding:9px 10px;ba
     <button id="newBtn" type="button">New Question</button>
   </div>
 
-  <div id="lineBox" class="svgbox"></div>
-  <div id="options" class="options"></div>
+  <div class="bigRow">
+    <div id="leftNum" class="numBox"></div>
+    <div id="signSlot" class="slot" tabindex="0">?</div>
+    <div id="rightNum" class="numBox"></div>
+  </div>
+
+  <div class="rackWrap">
+    <div class="rackTitle">Signs</div>
+    <div id="signRack" class="rack"></div>
+  </div>
 
   <div class="controls">
     <button id="clearBtn" type="button">Clear</button>
@@ -88,7 +101,7 @@ select{font:inherit;border:1px solid #bbb;border-radius:10px;padding:9px 10px;ba
     <button id="nextBtn" type="button" disabled>Next</button>
   </div>
 
-  <div id="feedback" class="feedback">Choose the calculation that matches the arrow.</div>
+  <div id="feedback" class="feedback"></div>
   <div id="steps" class="steps"></div>
 
   <div class="stats">
@@ -101,19 +114,19 @@ select{font:inherit;border:1px solid #bbb;border-radius:10px;padding:9px 10px;ba
   <div class="ws-top">
     <div>
       <div style="font-size:19px;font-weight:900">Worksheet</div>
-      <div id="wsMeta" class="subtitle">Write the calculation that matches each arrow.</div>
+      <div id="wsMeta" class="subtitle">Insert &gt;, &lt;, or = to compare each pair.</div>
     </div>
     <div class="row no-print">
       <label style="font-size:13px;font-weight:800">Questions
-        <select id="wsSize"><option>5</option><option selected>10</option><option>15</option></select>
+        <select id="wsCount"><option>5</option><option>10</option><option selected>15</option></select>
       </label>
-      <button id="genWS" class="primary" type="button">Generate</button>
-      <button id="revealAll" type="button" disabled>Reveal All</button>
-      <button id="hideAll" type="button" disabled>Hide All</button>
+      <button id="wsGen" class="primary" type="button">Generate</button>
+      <button id="wsRevealAll" type="button" disabled>Reveal All</button>
+      <button id="wsHideAll" type="button" disabled>Hide All</button>
       <button id="printBtn" type="button" disabled>Print</button>
     </div>
   </div>
-  <div id="columns"></div>
+  <div id="wsGrid" class="wgrid"></div>
 </section>
 
 <div class="footer">Created by Mr. McLean Math.</div>
@@ -125,145 +138,130 @@ select{font:inherit;border:1px solid #bbb;border-radius:10px;padding:9px 10px;ba
 const $=id=>document.getElementById(id);
 const randInt=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
 
-function tierSettings(diff){
-  if(diff==="easy")return {min:-10,max:10,minStep:1,maxStep:6,crossProb:.2,capStep1:.3};
-  if(diff==="medium")return {min:-15,max:15,minStep:3,maxStep:10,crossProb:.4,capStep1:0};
-  return {min:-20,max:20,minStep:6,maxStep:15,crossProb:.6,capStep1:0};
+const CFG={
+  easy:{min:-20,max:20,negPairBias:.6,equalChance:.1},
+  medium:{min:-200,max:200,negPairBias:.6,equalChance:.1},
+  hard:{min:-2000,max:2000,negPairBias:.7,equalChance:.12}
+};
+
+let difficulty="easy",L=0,R=0,chosen=null,evaluated=false,correctCount=0,incorrectCount=0;
+
+function formatSpaces(n){
+  const s=String(n),neg=s.startsWith("-"),d=neg?s.slice(1):s;
+  const grouped=d.replace(/\B(?=(\d{3})+(?!\d))/g," ");
+  return (neg?"-":"")+grouped;
 }
-function genProblem(diff){
-  const t=tierSettings(diff),wantCross=Math.random()<t.crossProb;
-  for(let tries=0;tries<500;tries++){
-    let step=randInt(t.minStep,t.maxStep);
-    if(step===1&&Math.random()>t.capStep1)step=Math.min(t.maxStep,Math.max(2,step+randInt(0,2)));
-    const c=(Math.random()<.5?-1:1)*step;
-    const s=randInt(t.min,t.max),e=s+c;
-    if(e<t.min||e>t.max)continue;
-    const crosses=(s*e<=0&&s!==e);
-    if(wantCross!==crosses)continue;
-    return {min:t.min,max:t.max,s,c,e};
+function genPair(){
+  const cfg=CFG[difficulty];
+  if(Math.random()<cfg.equalChance){
+    const v=randInt(cfg.min,cfg.max);return [v,v];
   }
-  return {min:t.min,max:t.max,s:0,c:t.minStep,e:t.minStep};
-}
-function formatEq(s,c,e){return `${s} ${c>=0?"+":"−"} ${Math.abs(c)} = ${e}`}
-function shuffle(a){
-  a=a.slice();
-  for(let i=a.length-1;i>0;i--){const j=randInt(0,i);[a[i],a[j]]=[a[j],a[i]]}
-  return a;
-}
-function buildMC(p){
-  const {s,c,e}=p,correct=formatEq(s,c,e),opts=new Set([correct]);
-  opts.add(formatEq(s,-c,e));
-  const near=e+(c>0?-1:1);
-  opts.add(Math.random()<.5?formatEq(s,Math.abs(c),near):formatEq(s,(c>=0?1:-1)*Math.max(1,Math.abs(c)-1),e));
-  opts.add(formatEq(e,-c,s));
-  const candidates=[];
-  for(const sign of [-1,1]){
-    for(const delta of [-2,-1,1,2]){
-      const tweak=sign*Math.max(1,Math.abs(c)+delta);
-      candidates.push(formatEq(s,tweak,e));
-      candidates.push(formatEq(s,tweak,s+tweak));
+  const bothNeg=Math.random()<cfg.negPairBias;
+  let a,b;
+  if(bothNeg){
+    const nmin=Math.min(-1,cfg.min);
+    a=randInt(nmin,-1);b=randInt(nmin,-1);
+    if(a===b)b=a-1;
+    if(b<cfg.min)b=a+1;
+  }else{
+    a=randInt(cfg.min,cfg.max);b=randInt(cfg.min,cfg.max);
+    if(a===b)b+=(b<cfg.max?1:-1);
+    if(Math.random()<.25){
+      const m=Math.max(1,Math.min(20,Math.abs(a)));a=-m;b=m;
     }
   }
-  for(const x of shuffle(candidates)){opts.add(x);if(opts.size>=4)break}
-  const all=shuffle([...opts].slice(0,4));
-  return {choices:all,correctIndex:all.indexOf(correct)};
+  return [a,b];
 }
-function numberLineSVG(p){
-  const baseW=1024,baseH=180,padL=42,padR=42,L=padL,R=baseW-padR,Y=Math.round(baseH/2)+12;
-  const scale=x=>L+((x-p.min)/(p.max-p.min))*(R-L);
-  const sX=scale(p.s),eX=scale(p.e),dir=eX>=sX?1:-1;
-  let labels="";
-  for(let v=p.min;v<=p.max;v++){
-    const x=scale(v),color=v===0?"var(--zero)":v<0?"var(--neg)":"var(--pos)",tick=v===0?16:12;
-    labels+=`<line x1="${x}" y1="${Y-tick/2}" x2="${x}" y2="${Y+tick/2}" stroke="${color}" stroke-width="${v===0?3:2}"/>
-    <text x="${x}" y="${Y+28}" text-anchor="middle" font-size="18" fill="${color}" font-weight="${v===0?700:500}">${v}</text>`;
-  }
-  const mid=(sX+eX)/2,path=`M ${sX} ${Y-8} Q ${mid} ${Y-34} ${eX} ${Y-8}`;
-  return `<svg width="100%" height="${baseH}" viewBox="0 0 ${baseW} ${baseH}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Number line from ${p.min} to ${p.max} with arrow from ${p.s} to ${p.e}">
-    <line x1="${L}" y1="${Y}" x2="${R}" y2="${Y}" stroke="#555" stroke-width="3"/>
-    ${labels}
-    <path d="${path}" fill="none" stroke="var(--arrow)" stroke-width="5"/>
-    <path d="M ${eX} ${Y-8} l ${dir>=0?-10:10} -5 l 0 10 Z" fill="var(--arrow)"/>
-  </svg>`;
+function signFor(a,b){return a>b?">":a<b?"<":"="}
+function explanation(a,b){
+  const s=signFor(a,b);
+  if(a===b)return `${formatSpaces(a)} and ${formatSpaces(b)} are equal, so the correct sign is =.`;
+  if(a>=0&&b>=0)return `${formatSpaces(a)} ${s} ${formatSpaces(b)}. Compare positive numbers normally.`;
+  if(a<0&&b<0)return `${formatSpaces(a)} ${s} ${formatSpaces(b)}. Between negative numbers, the number closer to zero is greater.`;
+  if(a<0)return `${formatSpaces(a)} ${s} ${formatSpaces(b)}. Any negative number is less than any non-negative number.`;
+  return `${formatSpaces(a)} ${s} ${formatSpaces(b)}. Any non-negative number is greater than any negative number.`;
 }
-
-let difficulty="easy",current=null,mc=null,selected=null,evaluated=false,correct=0,incorrect=0;
+function setSign(s){
+  if(evaluated)return;
+  chosen=s;$("signSlot").textContent=s||"?";$("signSlot").style.borderStyle=s?"solid":"dashed";
+}
+function buildRack(){
+  $("signRack").innerHTML="";
+  [">","<","="].forEach(s=>{
+    const b=document.createElement("button");b.className="chip";b.type="button";b.draggable=true;b.textContent=s;
+    b.addEventListener("dragstart",e=>e.dataTransfer.setData("text/plain",s));
+    b.addEventListener("click",()=>setSign(s));$("signRack").appendChild(b);
+  });
+}
+function setupDrop(){
+  const d=$("signSlot");
+  ["dragover","dragenter"].forEach(evt=>d.addEventListener(evt,e=>{e.preventDefault();d.classList.add("active")}));
+  ["dragleave","drop"].forEach(evt=>d.addEventListener(evt,()=>d.classList.remove("active")));
+  d.addEventListener("drop",e=>{e.preventDefault();const s=e.dataTransfer.getData("text/plain");if([">","<","="].includes(s))setSign(s)});
+}
+setupDrop();buildRack();
 
 function newQuestion(){
-  current=genProblem(difficulty);mc=buildMC(current);selected=null;evaluated=false;
-  $("lineBox").innerHTML=numberLineSVG(current);
-  const box=$("options");box.innerHTML="";
-  mc.choices.forEach((txt,i)=>{
-    const b=document.createElement("button");b.className="opt";b.type="button";b.dataset.index=i;
-    b.innerHTML=`<span class="eq">${txt}</span>`;
-    b.addEventListener("click",()=>{
-      if(evaluated)return;
-      selected=i;box.querySelectorAll(".opt").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");
-    });
-    box.appendChild(b);
-  });
-  $("feedback").className="feedback";$("feedback").textContent="Choose the calculation that matches the arrow.";
+  [L,R]=genPair();chosen=null;evaluated=false;
+  $("leftNum").textContent=formatSpaces(L);$("rightNum").textContent=formatSpaces(R);setSign(null);
+  $("feedback").style.display="none";$("feedback").className="feedback";$("feedback").textContent="";
   $("steps").style.display="none";$("steps").innerHTML="";
   $("submitBtn").disabled=false;$("nextBtn").disabled=true;
 }
 function submit(){
   if(evaluated)return;
-  if(selected===null){$("feedback").className="feedback";$("feedback").textContent="Choose an option first.";return}
-  evaluated=true;$("submitBtn").disabled=true;$("nextBtn").disabled=false;
-  const ok=selected===mc.correctIndex;
-  $("options").querySelectorAll(".opt").forEach((b,i)=>{
-    b.disabled=true;if(i===mc.correctIndex)b.classList.add("correct");if(i===selected&&!ok)b.classList.add("wrong");
-  });
-  const eq=formatEq(current.s,current.c,current.e);
-  if(ok){
-    correct++;$("correct").textContent=correct;$("feedback").className="feedback ok";$("feedback").textContent="Correct!";
-  }else{
-    incorrect++;$("incorrect").textContent=incorrect;$("feedback").className="feedback bad";$("feedback").textContent=`Incorrect. Correct answer: ${eq}`;
-    $("steps").innerHTML=`Start at <b>${current.s}</b>.<br>Move <b>${Math.abs(current.c)}</b> steps ${current.c>0?"right (+)":"left (−)"}.<br>End at <b>${current.e}</b>.<br>Calculation: <b>${eq}</b>.`;
-    $("steps").style.display="block";
+  if(!chosen){
+    $("feedback").style.display="block";$("feedback").className="feedback";$("feedback").textContent="Choose a sign first.";
+    return;
   }
+  const correct=signFor(L,R),ok=chosen===correct;
+  evaluated=true;$("submitBtn").disabled=true;$("nextBtn").disabled=false;
+  if(ok){
+    correctCount++;$("correct").textContent=correctCount;
+    $("feedback").className="feedback ok";$("feedback").textContent="Correct!";
+  }else{
+    incorrectCount++;$("incorrect").textContent=incorrectCount;
+    $("feedback").className="feedback bad";$("feedback").textContent=`Not quite. Correct comparison: ${formatSpaces(L)} ${correct} ${formatSpaces(R)}.`;
+    $("steps").textContent=explanation(L,R);$("steps").style.display="block";
+  }
+  $("feedback").style.display="block";
 }
-function clearChoice(){
-  if(evaluated)return;selected=null;$("options").querySelectorAll(".opt").forEach(x=>x.classList.remove("selected"));
-}
+function clear(){if(evaluated)return;setSign(null)}
+
 document.querySelectorAll(".level").forEach(b=>b.addEventListener("click",()=>{
   document.querySelectorAll(".level").forEach(x=>x.classList.remove("active"));b.classList.add("active");difficulty=b.dataset.diff;newQuestion();
 }));
-$("newBtn").addEventListener("click",newQuestion);$("submitBtn").addEventListener("click",submit);$("nextBtn").addEventListener("click",newQuestion);$("clearBtn").addEventListener("click",clearChoice);
-
+$("newBtn").addEventListener("click",newQuestion);$("submitBtn").addEventListener("click",submit);$("nextBtn").addEventListener("click",newQuestion);$("clearBtn").addEventListener("click",clear);
 document.addEventListener("keydown",e=>{
   if($("practiceCard").style.display==="none")return;
-  if(["1","2","3","4"].includes(e.key)&&!evaluated){
-    const i=Number(e.key)-1,b=$(`option-${i}`);
-    const opts=$("options").querySelectorAll(".opt");
-    if(opts[i])opts[i].click();
-  }else if(e.key==="Enter"){e.preventDefault();evaluated?newQuestion():submit()}
-  else if(e.key==="Escape"){e.preventDefault();clearChoice()}
+  if([">","<","="].includes(e.key)&&!evaluated)setSign(e.key);
+  else if(e.key==="Enter"){e.preventDefault();evaluated?newQuestion():submit()}
+  else if(e.key==="Escape"){e.preventDefault();clear()}
 });
 
 function showPractice(){$("practiceTab").classList.add("active");$("worksheetTab").classList.remove("active");$("practiceCard").style.display="block";$("worksheetCard").style.display="none"}
 function showWorksheet(){$("worksheetTab").classList.add("active");$("practiceTab").classList.remove("active");$("practiceCard").style.display="none";$("worksheetCard").style.display="block"}
 $("practiceTab").addEventListener("click",showPractice);$("worksheetTab").addEventListener("click",showWorksheet);
 
-function generateWorksheet(){
-  const n=Number($("wsSize").value),container=$("columns");container.innerHTML="";
-  for(let i=1;i<=n;i++){
-    const p=genProblem(difficulty),eq=formatEq(p.s,p.c,p.e),card=document.createElement("div");card.className="wcard";
-    card.innerHTML=`<h3>${i}.</h3><div class="svgbox">${numberLineSVG(p)}</div>`;
-    const ans=document.createElement("div");ans.className="wans";ans.innerHTML=`Answer: <b>${eq}</b>`;
-    const btn=document.createElement("button");btn.type="button";btn.className="no-print";btn.textContent="Reveal";
-    btn.addEventListener("click",()=>{ans.classList.toggle("show");btn.textContent=ans.classList.contains("show")?"Hide":"Reveal"});
-    card.append(btn,ans);container.appendChild(card);
-  }
-  const labels={easy:"Foundation",medium:"Core",hard:"Challenge"};$("wsMeta").textContent=`${labels[difficulty]} • ${n} questions`;
-  $("revealAll").disabled=$("hideAll").disabled=$("printBtn").disabled=false;
+function wsCard(pair,i){
+  const [a,b]=pair,s=signFor(a,b),c=document.createElement("div");c.className="wcard";
+  c.innerHTML=`<div class="wlabel">${i+1}</div><div class="wPair"><div class="wNum">${formatSpaces(a)}</div><div class="wSign">?</div><div class="wNum">${formatSpaces(b)}</div></div>`;
+  const ans=document.createElement("div");ans.className="wans";ans.innerHTML=`Answer: <b>${formatSpaces(a)} ${s} ${formatSpaces(b)}</b><br>${explanation(a,b)}`;
+  const btn=document.createElement("button");btn.type="button";btn.className="no-print";btn.textContent="Reveal";btn.addEventListener("click",()=>{ans.classList.toggle("show");btn.textContent=ans.classList.contains("show")?"Hide":"Reveal"});
+  c.append(btn,ans);return c;
 }
-$("genWS").addEventListener("click",generateWorksheet);
-$("revealAll").addEventListener("click",()=>document.querySelectorAll(".wans").forEach(x=>x.classList.add("show")));
-$("hideAll").addEventListener("click",()=>document.querySelectorAll(".wans").forEach(x=>x.classList.remove("show")));
+function generateWs(){
+  const n=Number($("wsCount").value),grid=$("wsGrid");grid.innerHTML="";
+  for(let i=0;i<n;i++)grid.appendChild(wsCard(genPair(),i));
+  const labels={easy:"Foundation",medium:"Core",hard:"Challenge"};$("wsMeta").textContent=`${labels[difficulty]} • ${n} questions`;
+  $("wsRevealAll").disabled=$("wsHideAll").disabled=$("printBtn").disabled=false;
+}
+$("wsGen").addEventListener("click",generateWs);
+$("wsRevealAll").addEventListener("click",()=>document.querySelectorAll(".wans").forEach(x=>x.classList.add("show")));
+$("wsHideAll").addEventListener("click",()=>document.querySelectorAll(".wans").forEach(x=>x.classList.remove("show")));
 $("printBtn").addEventListener("click",()=>window.print());
 
-window.__MMM_TEST__={genProblem,buildMC,tierSettings};
+window.__MMM_TEST__={genPair,signFor,CFG};
 newQuestion();
 })();
 </script>
