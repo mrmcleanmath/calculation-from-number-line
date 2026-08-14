@@ -1,429 +1,271 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Write the Calculation from a Number Line</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Write the Calculation from a Number Line – Mr. McLean Math</title>
 <style>
-  :root{
-    --bg:#ffffff; --fg:#111111; --card:#f7f7f9; --muted:#666;
-    --pos:#0b57d0; --neg:#c0392b; --zero:#111; --arrow:#c0392b;
-    --ok:#1b8f2e; --bad:#c62828; --accent:#0b57d0;
-  }
-  body{margin:0; padding:16px; font-family:Arial,Helvetica,sans-serif; background:var(--bg); color:var(--fg);}
-  h1{margin:0 0 12px; font-size:clamp(20px,3.2vw,28px);}
-  .row{display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:8px 0;}
-  select,button{font-size:16px;}
-  button{padding:8px 14px; border:1px solid #bbb; background:#fff; border-radius:10px; cursor:pointer}
-  button:hover{border-color:#888}
-  .pill{padding:6px 10px; border-radius:999px; background:#eee; font-size:14px;}
-  .wrap{border:1px solid #ddd; border-radius:14px; background:#fff; padding:14px; margin-top:12px;}
-  .center{display:flex; justify-content:center;}
-  .options{display:grid; gap:10px; margin-top:10px;}
-  @media (min-width:700px){ .options{grid-template-columns:repeat(2,1fr);} }
-  .opt{padding:10px 12px; border:1px solid #cfcfcf; border-radius:12px; text-align:center; cursor:pointer; background:#fafafa;}
-  .opt:focus{outline:3px solid #91b7ff;}
-  .opt.correct{border-color:var(--ok)}
-  .opt.wrong{border-color:var(--bad)}
-  .eq{font-size:22px;}
-  .feedback{min-height:1.6em; font-weight:700; margin-top:8px;}
-  .feedback.ok{color:var(--ok)} .feedback.bad{color:var(--bad)}
-  .steps{display:none; margin-top:8px; background:var(--card); border-radius:12px; padding:10px 12px;}
-  .summary{margin-top:10px; font-size:14px; color:var(--muted);}
-  .svgbox{max-width:860px; margin:0 auto;}
-  .smallNote{font-size:12px; color:var(--muted);}
-
-  /* Worksheet — vertical, full width */
-  #worksheetArea{display:none;}
-  #columns{display:flex; flex-direction:column; gap:14px;}
-  .card{border:1px solid #e2e2e2; border-radius:12px; background:#fafafa; padding:10px 12px; width:100%;}
-  .card h3{margin:0 0 6px; font-size:16px;}
-  .card .a{display:none; font-weight:600; margin-top:6px;}
-  .card .btns{margin-top:8px;}
-  .card .svgbox{max-width:none; margin:0;}
-
-  footer{margin-top:22px; opacity:.8;}
-
-  /* High-contrast */
-  .hi-contrast{
-    --bg:#000; --fg:#fff; --card:#0b0b0b; --muted:#bbb;
-    --pos:#8ab4ff; --neg:#ff8a8a; --zero:#fff; --arrow:#ffd400;
-    --ok:#7CFC00; --bad:#ff5252; --accent:#ffd400;
-  }
-  .hi-contrast button, .hi-contrast select{background:#111;color:#fff;border-color:#666}
-
-  .sr{position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden;}
+:root{
+  --bg:#fff;--fg:#111;--card:#f7f7f9;--muted:#666;--pos:#0b57d0;--neg:#c0392b;
+  --zero:#111;--arrow:#c0392b;--ok:#1b8f2e;--bad:#c62828;--border:#ddd;--accent:#0b57d0;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 Arial,Helvetica,sans-serif}
+.wrap{max-width:920px;margin:0 auto;padding:20px 14px 28px}
+header{display:flex;justify-content:space-between;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px}
+h1{margin:0;font-size:clamp(24px,3vw,34px)}
+.subtitle{margin-top:5px;color:var(--muted);font-size:14px}
+.tabs,.levels,.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button{font:inherit;border:1px solid #bbb;background:#fff;border-radius:10px;padding:9px 13px;font-weight:700;cursor:pointer}
+button.active,button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+button:disabled{opacity:.5;cursor:not-allowed}
+.card{border:1px solid var(--border);border-radius:14px;background:#fff;padding:15px}
+.toolbar{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.label{font-size:12px;color:var(--muted);font-weight:800;margin-bottom:6px}
+.svgbox{max-width:860px;margin:0 auto}
+.options{display:grid;gap:10px;margin-top:12px}
+@media(min-width:700px){.options{grid-template-columns:1fr 1fr}}
+.opt{padding:11px 12px;border:1px solid #cfcfcf;border-radius:12px;text-align:center;background:#fafafa;cursor:pointer}
+.opt.selected{outline:3px solid #91b7ff}
+.opt.correct{border-color:var(--ok);background:#f2fbf4}
+.opt.wrong{border-color:var(--bad);background:#fff3f3}
+.eq{font-size:21px}
+.controls{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:12px}
+.feedback{min-height:48px;margin-top:10px;padding:10px 12px;border-radius:10px;background:#fafafa}
+.feedback.ok{color:var(--ok);font-weight:800}.feedback.bad{color:var(--bad);font-weight:800}
+.steps{display:none;margin-top:8px;background:var(--card);border-radius:12px;padding:10px 12px;line-height:1.55}
+.stats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.stat{padding:7px 11px;border:1px solid var(--border);border-radius:999px;font-size:13px;font-weight:800}
+.worksheet{display:none}
+.ws-top{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+select{font:inherit;border:1px solid #bbb;border-radius:10px;padding:9px 10px;background:#fff}
+#columns{display:flex;flex-direction:column;gap:14px}
+.wcard{border:1px solid #e2e2e2;border-radius:12px;background:#fafafa;padding:10px 12px}
+.wcard h3{margin:0 0 6px;font-size:16px}
+.wans{display:none;font-weight:700;margin-top:6px}.wans.show{display:block}
+.footer{text-align:center;color:var(--muted);font-size:12px;margin-top:14px}
+@media print{
+  body{background:#fff}.wrap{max-width:none;padding:0}
+  header,#practiceCard,.no-print,.footer{display:none!important}
+  #worksheetCard{display:block!important;border:0;padding:0}
+  .wans{display:none!important}
+}
 </style>
 </head>
 <body>
-  <h1>Write the Calculation from a Number Line</h1>
+<div class="wrap">
+<header>
+  <div>
+    <h1>Write the Calculation from a Number Line</h1>
+    <div class="subtitle">Match the arrow to the correct calculation.</div>
+  </div>
+  <div class="tabs">
+    <button id="practiceTab" class="active" type="button">Practice</button>
+    <button id="worksheetTab" type="button">Worksheet</button>
+  </div>
+</header>
 
-  <div class="row">
-    <label>Mode:
-      <select id="modeSelect" aria-label="Mode">
-        <option value="game">Game Mode (MC)</option>
-        <option value="worksheet">Worksheet Mode</option>
-      </select>
-    </label>
-    <label>Difficulty:
-      <select id="diffSelect" aria-label="Difficulty">
-        <option value="easy">🟢 Easy</option>
-        <option value="medium">🟡 Medium</option>
-        <option value="hard">🔴 Hard</option>
-        <option value="mixed">🎲 Mixed</option>
-      </select>
-    </label>
-    <button id="contrastBtn" aria-pressed="false" onclick="toggleContrast()">High Contrast</button>
-    <button id="soundBtn" aria-pressed="true" onclick="toggleSound()">Sound: On</button>
-    <span class="pill">Keyboard: 1–4 choose • Enter submit • N next • Esc clear</span>
+<section id="practiceCard" class="card">
+  <div class="toolbar">
+    <div>
+      <div class="label">Difficulty</div>
+      <div class="levels">
+        <button class="level active" data-diff="easy" type="button">Foundation</button>
+        <button class="level" data-diff="medium" type="button">Core</button>
+        <button class="level" data-diff="hard" type="button">Challenge</button>
+      </div>
+    </div>
+    <button id="newBtn" type="button">New Question</button>
   </div>
 
-  <!-- Game -->
-  <section id="gameArea" class="wrap" role="region" aria-label="Game area">
-    <div id="lineBox" class="svgbox center" aria-live="polite"></div>
-    <div class="options" id="options"></div>
-    <div class="row center">
-      <button onclick="submitMC()">Submit (Enter)</button>
-      <button onclick="nextProblem()">Next (N)</button>
-      <button onclick="clearChoice()">Clear (Esc)</button>
-    </div>
-    <div id="feedback" class="feedback" aria-live="polite"></div>
-    <div id="steps" class="steps"></div>
-    <div id="summary" class="summary"></div>
-  </section>
+  <div id="lineBox" class="svgbox"></div>
+  <div id="options" class="options"></div>
 
-  <!-- Worksheet -->
-  <section id="worksheetArea" class="wrap" role="region" aria-label="Worksheet area">
-    <p>Look at the number line and write the calculation that matches the arrow.</p>
-    <div class="row">
-      <label>Set size:
-        <select id="wsSize">
-          <option>5</option><option selected>10</option><option>15</option>
-        </select>
+  <div class="controls">
+    <button id="clearBtn" type="button">Clear</button>
+    <button id="submitBtn" class="primary" type="button">Check</button>
+    <button id="nextBtn" type="button" disabled>Next</button>
+  </div>
+
+  <div id="feedback" class="feedback">Choose the calculation that matches the arrow.</div>
+  <div id="steps" class="steps"></div>
+
+  <div class="stats">
+    <div class="stat">Correct: <span id="correct">0</span></div>
+    <div class="stat">Incorrect: <span id="incorrect">0</span></div>
+  </div>
+</section>
+
+<section id="worksheetCard" class="card worksheet">
+  <div class="ws-top">
+    <div>
+      <div style="font-size:19px;font-weight:900">Worksheet</div>
+      <div id="wsMeta" class="subtitle">Write the calculation that matches each arrow.</div>
+    </div>
+    <div class="row no-print">
+      <label style="font-size:13px;font-weight:800">Questions
+        <select id="wsSize"><option>5</option><option selected>10</option><option>15</option></select>
       </label>
-      <button onclick="generateWorksheet()">Generate</button>
-      <button onclick="revealAll()">Reveal All</button>
-      <button onclick="hideAll()">Hide All</button>
-      <span class="smallNote">Vertical cards—show 3–4 at a time on projector.</span>
+      <button id="genWS" class="primary" type="button">Generate</button>
+      <button id="revealAll" type="button" disabled>Reveal All</button>
+      <button id="hideAll" type="button" disabled>Hide All</button>
+      <button id="printBtn" type="button" disabled>Print</button>
     </div>
-    <div id="columns"></div>
-  </section>
+  </div>
+  <div id="columns"></div>
+</section>
 
-  <footer>Created by Mr. McLean Math</footer>
-
-  <div id="live" class="sr" aria-live="polite"></div>
+<div class="footer">Created by Mr. McLean Math.</div>
+</div>
 
 <script>
-/* ========= Helpers ========= */
-const randInt = (a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+(() => {
+"use strict";
+const $=id=>document.getElementById(id);
+const randInt=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
 
-function beep(success=true){
-  if(!soundOn) return;
-  const ctx = new (window.AudioContext||window.webkitAudioContext)();
-  const o = ctx.createOscillator();
-  const g = ctx.createGain();
-  o.connect(g); g.connect(ctx.destination);
-  o.type = 'sine'; o.frequency.value = success ? 880 : 220;
-  g.gain.value = 0.001; g.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime+0.01);
-  o.start();
-  setTimeout(()=>{ g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+0.09); o.stop(ctx.currentTime+0.1); }, 90);
-}
-
-/* ========= Problem generation ========= */
 function tierSettings(diff){
-  if(diff==='easy')   return {min:-10,max:10, minStep:1,maxStep:6, crossProb:0.2, capStep1:0.3};
-  if(diff==='medium') return {min:-15,max:15, minStep:3,maxStep:10, crossProb:0.4, capStep1:0};
-  if(diff==='hard')   return {min:-20,max:20, minStep:6,maxStep:15, crossProb:0.6, capStep1:0};
-  return tierSettings(['easy','medium','hard'][randInt(0,2)]);
+  if(diff==="easy")return {min:-10,max:10,minStep:1,maxStep:6,crossProb:.2,capStep1:.3};
+  if(diff==="medium")return {min:-15,max:15,minStep:3,maxStep:10,crossProb:.4,capStep1:0};
+  return {min:-20,max:20,minStep:6,maxStep:15,crossProb:.6,capStep1:0};
 }
 function genProblem(diff){
-  const t = tierSettings(diff);
-  let s, c, e, tries=0;
-  const wantCross = Math.random() < t.crossProb;
-  while(true){
-    tries++; if(tries>500) break;
-    let step = randInt(t.minStep, t.maxStep);
-    if(step===1 && Math.random()>t.capStep1) step = Math.min(t.maxStep, Math.max(2, step+randInt(0,2)));
-    const dir = Math.random()<0.5 ? -1 : 1;
-    c = dir*step;
-    s = randInt(t.min, t.max);
-    e = s + c;
-    if(e < t.min || e > t.max) continue;
-    const crosses = (s*e<=0 && s!==e);
-    if(wantCross && !crosses) continue;
-    if(!wantCross && crosses) continue;
-    if(c===0) continue;
-    break;
+  const t=tierSettings(diff),wantCross=Math.random()<t.crossProb;
+  for(let tries=0;tries<500;tries++){
+    let step=randInt(t.minStep,t.maxStep);
+    if(step===1&&Math.random()>t.capStep1)step=Math.min(t.maxStep,Math.max(2,step+randInt(0,2)));
+    const c=(Math.random()<.5?-1:1)*step;
+    const s=randInt(t.min,t.max),e=s+c;
+    if(e<t.min||e>t.max)continue;
+    const crosses=(s*e<=0&&s!==e);
+    if(wantCross!==crosses)continue;
+    return {min:t.min,max:t.max,s,c,e};
   }
-  return {min:t.min,max:t.max, s, c, e};
+  return {min:t.min,max:t.max,s:0,c:t.minStep,e:t.minStep};
 }
-
-/* ========= Equation formatting ========= */
-function formatEqSimple(s,c,e){
-  const mag = Math.abs(c);
-  const op = c>=0 ? '+' : '−';
-  return `${s} ${op} ${mag} = ${e}`;
+function formatEq(s,c,e){return `${s} ${c>=0?"+":"−"} ${Math.abs(c)} = ${e}`}
+function shuffle(a){
+  a=a.slice();
+  for(let i=a.length-1;i>0;i--){const j=randInt(0,i);[a[i],a[j]]=[a[j],a[i]]}
+  return a;
 }
-
-/* ========= SVG Number line ========= */
-function numberLineSVG(prob, width=820, height=160, responsive=false, labelSize=18){
-  const {min,max,s,e} = prob;
-  const padL=40, padR=40;
-  const baseW = responsive ? 1024 : width;
-  const baseH = responsive ? 180  : height;
-
-  const L = padL, R = baseW - padR, Y = Math.round(baseH/2)+12;
-  const scale = (x)=> L + ((x-min)/(max-min))*(R-L);
-  const sX = scale(s), eX = scale(e);
-  const dir = eX>=sX ? 1 : -1;
-
-  let labels = '';
-  for(let v=min; v<=max; v++){
-    const x=scale(v);
-    const color = v===0? 'var(--zero)' : (v<0? 'var(--neg)' : 'var(--pos)');
-    const tickH = v===0 ? 16 : 12;
-    labels += `
-      <line x1="${x}" y1="${Y-tickH/2}" x2="${x}" y2="${Y+tickH/2}" stroke="${color}" stroke-width="${v===0?3:2}"/>
-      <text x="${x}" y="${Y+28}" text-anchor="middle" font-size="${labelSize}" fill="${color}" font-weight="${v===0?'700':'500'}">${v}</text>
-    `;
+function buildMC(p){
+  const {s,c,e}=p,correct=formatEq(s,c,e),opts=new Set([correct]);
+  opts.add(formatEq(s,-c,e));
+  const near=e+(c>0?-1:1);
+  opts.add(Math.random()<.5?formatEq(s,Math.abs(c),near):formatEq(s,(c>=0?1:-1)*Math.max(1,Math.abs(c)-1),e));
+  opts.add(formatEq(e,-c,s));
+  const candidates=[];
+  for(const sign of [-1,1]){
+    for(const delta of [-2,-1,1,2]){
+      const tweak=sign*Math.max(1,Math.abs(c)+delta);
+      candidates.push(formatEq(s,tweak,e));
+      candidates.push(formatEq(s,tweak,s+tweak));
+    }
   }
-
-  const arrowPath = (x1,y1,x2,y2)=>{
-    const midX=(x1+x2)/2, cY=y1-26;
-    return `M ${x1} ${y1} Q ${midX} ${cY} ${x2} ${y2}`;
-  };
-  const pathStr = arrowPath(sX,Y-8,eX,Y-8);
-
-  if(responsive){
-    return `
-    <svg width="100%" height="${baseH}" viewBox="0 0 ${baseW} ${baseH}" preserveAspectRatio="xMidYMid meet"
-         role="img" aria-label="Number line from ${min} to ${max} with arrow from ${s} to ${e}">
-      <line x1="${L}" y1="${Y}" x2="${R}" y2="${Y}" stroke="#555" stroke-width="3" />
-      ${labels}
-      <path d="${pathStr}" fill="none" stroke="var(--arrow)" stroke-width="5" />
-      <path d="M ${eX} ${Y-8} l ${dir>=0?-10:10} -5 l 0 10 Z" fill="var(--arrow)" />
-    </svg>`;
-  } else {
-    return `
-    <svg width="${baseW}" height="${baseH}" role="img" aria-label="Number line from ${min} to ${max} with arrow from ${s} to ${e}">
-      <line x1="${L}" y1="${Y}" x2="${R}" y2="${Y}" stroke="#555" stroke-width="3" />
-      ${labels}
-      <path d="${pathStr}" fill="none" stroke="var(--arrow)" stroke-width="5" />
-      <path d="M ${eX} ${Y-8} l ${dir>=0?-10:10} -5 l 0 10 Z" fill="var(--arrow)" />
-    </svg>`;
+  for(const x of shuffle(candidates)){opts.add(x);if(opts.size>=4)break}
+  const all=shuffle([...opts].slice(0,4));
+  return {choices:all,correctIndex:all.indexOf(correct)};
+}
+function numberLineSVG(p){
+  const baseW=1024,baseH=180,padL=42,padR=42,L=padL,R=baseW-padR,Y=Math.round(baseH/2)+12;
+  const scale=x=>L+((x-p.min)/(p.max-p.min))*(R-L);
+  const sX=scale(p.s),eX=scale(p.e),dir=eX>=sX?1:-1;
+  let labels="";
+  for(let v=p.min;v<=p.max;v++){
+    const x=scale(v),color=v===0?"var(--zero)":v<0?"var(--neg)":"var(--pos)",tick=v===0?16:12;
+    labels+=`<line x1="${x}" y1="${Y-tick/2}" x2="${x}" y2="${Y+tick/2}" stroke="${color}" stroke-width="${v===0?3:2}"/>
+    <text x="${x}" y="${Y+28}" text-anchor="middle" font-size="18" fill="${color}" font-weight="${v===0?700:500}">${v}</text>`;
   }
+  const mid=(sX+eX)/2,path=`M ${sX} ${Y-8} Q ${mid} ${Y-34} ${eX} ${Y-8}`;
+  return `<svg width="100%" height="${baseH}" viewBox="0 0 ${baseW} ${baseH}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Number line from ${p.min} to ${p.max} with arrow from ${p.s} to ${p.e}">
+    <line x1="${L}" y1="${Y}" x2="${R}" y2="${Y}" stroke="#555" stroke-width="3"/>
+    ${labels}
+    <path d="${path}" fill="none" stroke="var(--arrow)" stroke-width="5"/>
+    <path d="M ${eX} ${Y-8} l ${dir>=0?-10:10} -5 l 0 10 Z" fill="var(--arrow)"/>
+  </svg>`;
 }
 
-/* ========= MC options (simple form only) ========= */
-function buildMC(prob){
-  const {s,c,e} = prob;
+let difficulty="easy",current=null,mc=null,selected=null,evaluated=false,correct=0,incorrect=0;
 
-  // Correct answer in simple Year 7 style: start ± steps = end
-  const correctStr = formatEqSimple(s,c,e);
-  const opts = new Set([correctStr]);
-
-  // 1. Same start/end but wrong direction sign
-  const d1 = formatEqSimple(s,-c,e);
-  if(!opts.has(d1)) opts.add(d1);
-
-  // 2. Slightly wrong end or step size
-  const near = e + (c>0?-1:1);
-  const d2 = (Math.random()<0.5)
-    ? formatEqSimple(s,Math.abs(c),near)                         // wrong end
-    : formatEqSimple(s,(c>=0?1:-1)*Math.max(1,Math.abs(c)-1),e); // wrong step
-  if(!opts.has(d2)) opts.add(d2);
-
-  // 3. Swap start/end or reverse thinking
-  const d3 = formatEqSimple(e,c*-1,s);
-  if(!opts.has(d3)) opts.add(d3);
-
-  // 4. Fill with more simple-style variations if needed
-  while(opts.size<4){
-    const tweak = c*(Math.random()<0.5?-1:1) + (Math.random()<0.5?1:-1);
-    const d = formatEqSimple(s,tweak,e);
-    if(!opts.has(d)) opts.add(d);
-  }
-
-  const all = Array.from(opts);
-  for(let i=all.length-1;i>0;i--){ const j=randInt(0,i); [all[i],all[j]]=[all[j],all[i]]; }
-  const correctIndex = all.indexOf(correctStr);
-  return {choices:all, correctIndex};
-}
-
-/* ========= Game state & UI ========= */
-let current=null, mc=null, selectedIndex=null;
-let stats = {answered:0, correct:0, streak:0, best:0, score:0};
-let soundOn = true;
-
-function renderProblem(){
-  const diff = document.getElementById('diffSelect').value;
-  current = genProblem(diff);
-  mc = buildMC(current);
-  selectedIndex = null;
-
-  document.getElementById('lineBox').innerHTML = numberLineSVG(current, 860, 180, false, 18);
-  const optBox = document.getElementById('options'); optBox.innerHTML='';
-  mc.choices.forEach((text,idx)=>{
-    const btn = document.createElement('button');
-    btn.className='opt'; btn.setAttribute('data-idx',idx);
-    btn.innerHTML = `<span class="eq">${text.replaceAll('-', '−')}</span>`;
-    btn.addEventListener('click',()=>selectOption(idx,btn));
-    btn.addEventListener('keydown',(e)=>{ if(e.key==='Enter'){ selectOption(idx,btn); }});
-    optBox.appendChild(btn);
-  });
-  document.getElementById('feedback').textContent='';
-  document.getElementById('feedback').className='feedback';
-  document.getElementById('steps').style.display='none';
-  updateSummary();
-}
-function selectOption(idx,btn){
-  selectedIndex = idx;
-  document.querySelectorAll('.opt').forEach(el=>el.style.outline='');
-  btn.style.outline='3px solid #91b7ff';
-}
-function submitMC(){
-  if(selectedIndex==null){ announce('Choose an option first'); return; }
-  const correct = selectedIndex===mc.correctIndex;
-  const fb = document.getElementById('feedback');
-  document.querySelectorAll('.opt').forEach((el,i)=>{
-    el.classList.remove('correct','wrong');
-    if(i===mc.correctIndex) el.classList.add('correct');
-    if(i===selectedIndex && !correct) el.classList.add('wrong');
-  });
-  if(correct){
-    stats.answered++; stats.correct++; stats.streak++; stats.best=Math.max(stats.best,stats.streak); stats.score+=10;
-    fb.textContent='✔ Correct!'; fb.className='feedback ok'; beep(true);
-  }else{
-    stats.answered++; stats.streak=0;
-    fb.textContent='✖ Incorrect.'; fb.className='feedback bad'; beep(false);
-    showSteps();
-  }
-  updateSummary();
-}
-function nextProblem(){ renderProblem(); }
-function clearChoice(){
-  selectedIndex=null;
-  document.querySelectorAll('.opt').forEach(el=>el.style.outline='');
-}
-function updateSummary(){
-  const {answered,correct,streak,best,score}=stats;
-  const acc = answered? Math.round(100*correct/answered):0;
-  document.getElementById('summary').textContent =
-    `Answered: ${answered} • Correct: ${correct} • Accuracy: ${acc}% • Streak: ${streak} (Best ${best}) • Score: ${score}`;
-}
-function showSteps(){
-  const box = document.getElementById('steps');
-  const s=current.s, c=current.c, e=current.e;
-  const eq = formatEqSimple(s,c,e);
-  const dir = c>0?'right (+)':'left (−)';
-  box.innerHTML = `
-    <strong>Show Steps</strong>
-    <ol>
-      <li><b>Start</b> at <b>${s}</b> (tail of the arrow).</li>
-      <li>Move ${Math.abs(c)} steps to the <b>${dir}</b>.</li>
-      <li>End at <b>${e}</b>.</li>
-      <li>Write the equation: <code>${eq}</code></li>
-    </ol>`;
-  box.style.display='block';
-}
-function toggleContrast(){
-  const pressed = document.body.classList.toggle('hi-contrast');
-  document.getElementById('contrastBtn').setAttribute('aria-pressed', pressed?'true':'false');
-}
-function toggleSound(){
-  soundOn = !soundOn;
-  document.getElementById('soundBtn').textContent = 'Sound: ' + (soundOn?'On':'Off');
-  document.getElementById('soundBtn').setAttribute('aria-pressed', soundOn?'true':'false');
-}
-function announce(msg){ const live=document.getElementById('live'); live.textContent=''; setTimeout(()=>live.textContent=msg, 10); }
-
-/* ========= Keyboard shortcuts ========= */
-document.addEventListener('keydown', (e)=>{
-  const k=e.key;
-  if(k==='1'||k==='2'||k==='3'||k==='4'){
-    const idx=parseInt(k,10)-1;
-    const btn=document.querySelector(`.opt[data-idx="${idx}"]`);
-    if(btn) selectOption(idx,btn);
-  }
-  if(k==='Enter'){ submitMC(); }
-  if(k==='n' || k==='N'){ nextProblem(); }
-  if(k==='Escape'){ clearChoice(); }
-});
-
-/* ========= Worksheet mode (vertical, full-width) ========= */
-function generateWorksheet(){
-  const size = parseInt(document.getElementById('wsSize').value,10);
-  const diff = document.getElementById('diffSelect').value;
-  const container = document.getElementById('columns'); container.innerHTML='';
-
-  for(let i=1;i<=size;i++){
-    const prob = genProblem(diff);
-    const card = document.createElement('div');
-    card.className='card';
-
-    const eq = formatEqSimple(prob.s,prob.c,prob.e);
-
-    // Bigger worksheet labels (20px)
-    card.innerHTML = `
-      <h3>${i}.</h3>
-      <div class="svgbox">${numberLineSVG(prob, 1024, 180, true, 20)}</div>
-      <div class="btns"><button aria-expanded="false">Reveal</button></div>
-      <div class="a">Answer: <code>${eq}</code></div>
-    `;
-    const btn = card.querySelector('button');
-    const ans = card.querySelector('.a');
-    btn.addEventListener('click', ()=>{
-      const show = ans.style.display==='block';
-      ans.style.display = show?'none':'block';
-      btn.textContent = show?'Reveal':'Hide';
-      btn.setAttribute('aria-expanded',(!show).toString());
+function newQuestion(){
+  current=genProblem(difficulty);mc=buildMC(current);selected=null;evaluated=false;
+  $("lineBox").innerHTML=numberLineSVG(current);
+  const box=$("options");box.innerHTML="";
+  mc.choices.forEach((txt,i)=>{
+    const b=document.createElement("button");b.className="opt";b.type="button";b.dataset.index=i;
+    b.innerHTML=`<span class="eq">${txt}</span>`;
+    b.addEventListener("click",()=>{
+      if(evaluated)return;
+      selected=i;box.querySelectorAll(".opt").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");
     });
-    container.appendChild(card);
-  }
+    box.appendChild(b);
+  });
+  $("feedback").className="feedback";$("feedback").textContent="Choose the calculation that matches the arrow.";
+  $("steps").style.display="none";$("steps").innerHTML="";
+  $("submitBtn").disabled=false;$("nextBtn").disabled=true;
 }
-function revealAll(){
-  document.querySelectorAll('#columns .a').forEach(el=>el.style.display='block');
-  document.querySelectorAll('#columns button').forEach(b=>b.textContent='Hide');
-}
-function hideAll(){
-  document.querySelectorAll('#columns .a').forEach(el=>el.style.display='none');
-  document.querySelectorAll('#columns button').forEach(b=>b.textContent='Reveal');
-}
-
-/* ========= Mode switching ========= */
-document.getElementById('modeSelect').addEventListener('change', ()=>{
-  const m = document.getElementById('modeSelect').value;
-  if(m==='worksheet'){
-    document.getElementById('gameArea').style.display='none';
-    document.getElementById('worksheetArea').style.display='block';
+function submit(){
+  if(evaluated)return;
+  if(selected===null){$("feedback").className="feedback";$("feedback").textContent="Choose an option first.";return}
+  evaluated=true;$("submitBtn").disabled=true;$("nextBtn").disabled=false;
+  const ok=selected===mc.correctIndex;
+  $("options").querySelectorAll(".opt").forEach((b,i)=>{
+    b.disabled=true;if(i===mc.correctIndex)b.classList.add("correct");if(i===selected&&!ok)b.classList.add("wrong");
+  });
+  const eq=formatEq(current.s,current.c,current.e);
+  if(ok){
+    correct++;$("correct").textContent=correct;$("feedback").className="feedback ok";$("feedback").textContent="Correct!";
   }else{
-    document.getElementById('worksheetArea').style.display='none';
-    document.getElementById('gameArea').style.display='block';
-    renderProblem();
+    incorrect++;$("incorrect").textContent=incorrect;$("feedback").className="feedback bad";$("feedback").textContent=`Incorrect. Correct answer: ${eq}`;
+    $("steps").innerHTML=`Start at <b>${current.s}</b>.<br>Move <b>${Math.abs(current.c)}</b> steps ${current.c>0?"right (+)":"left (−)"}.<br>End at <b>${current.e}</b>.<br>Calculation: <b>${eq}</b>.`;
+    $("steps").style.display="block";
   }
+}
+function clearChoice(){
+  if(evaluated)return;selected=null;$("options").querySelectorAll(".opt").forEach(x=>x.classList.remove("selected"));
+}
+document.querySelectorAll(".level").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".level").forEach(x=>x.classList.remove("active"));b.classList.add("active");difficulty=b.dataset.diff;newQuestion();
+}));
+$("newBtn").addEventListener("click",newQuestion);$("submitBtn").addEventListener("click",submit);$("nextBtn").addEventListener("click",newQuestion);$("clearBtn").addEventListener("click",clearChoice);
+
+document.addEventListener("keydown",e=>{
+  if($("practiceCard").style.display==="none")return;
+  if(["1","2","3","4"].includes(e.key)&&!evaluated){
+    const i=Number(e.key)-1,b=$(`option-${i}`);
+    const opts=$("options").querySelectorAll(".opt");
+    if(opts[i])opts[i].click();
+  }else if(e.key==="Enter"){e.preventDefault();evaluated?newQuestion():submit()}
+  else if(e.key==="Escape"){e.preventDefault();clearChoice()}
 });
 
-/* ========= Dev tests (enable with ?dev=1) ========= */
-(function dev(){
-  const p = new URLSearchParams(location.search);
-  if(!p.get('dev')) return;
-  const tests=[];
-  for(let i=0;i<50;i++){
-    const pr=genProblem('mixed');
-    tests.push(pr.s>=pr.min && pr.s<=pr.max && pr.e>=pr.min && pr.e<=pr.max);
-  }
-  for(let i=0;i<20;i++){
-    const pr=genProblem('mixed'), m=buildMC(pr);
-    tests.push(m.choices.length===4 && m.correctIndex>=0);
-  }
-  const pr=genProblem('easy');
-  const svg=numberLineSVG(pr,1024,180,true,20);
-  tests.push(svg.includes('viewBox'));
-  console.log('DEV TESTS:', tests.every(Boolean)?'✅ PASS':'❌ FAIL', tests);
-})();
+function showPractice(){$("practiceTab").classList.add("active");$("worksheetTab").classList.remove("active");$("practiceCard").style.display="block";$("worksheetCard").style.display="none"}
+function showWorksheet(){$("worksheetTab").classList.add("active");$("practiceTab").classList.remove("active");$("practiceCard").style.display="none";$("worksheetCard").style.display="block"}
+$("practiceTab").addEventListener("click",showPractice);$("worksheetTab").addEventListener("click",showWorksheet);
 
-/* ========= Init ========= */
-renderProblem();
+function generateWorksheet(){
+  const n=Number($("wsSize").value),container=$("columns");container.innerHTML="";
+  for(let i=1;i<=n;i++){
+    const p=genProblem(difficulty),eq=formatEq(p.s,p.c,p.e),card=document.createElement("div");card.className="wcard";
+    card.innerHTML=`<h3>${i}.</h3><div class="svgbox">${numberLineSVG(p)}</div>`;
+    const ans=document.createElement("div");ans.className="wans";ans.innerHTML=`Answer: <b>${eq}</b>`;
+    const btn=document.createElement("button");btn.type="button";btn.className="no-print";btn.textContent="Reveal";
+    btn.addEventListener("click",()=>{ans.classList.toggle("show");btn.textContent=ans.classList.contains("show")?"Hide":"Reveal"});
+    card.append(btn,ans);container.appendChild(card);
+  }
+  const labels={easy:"Foundation",medium:"Core",hard:"Challenge"};$("wsMeta").textContent=`${labels[difficulty]} • ${n} questions`;
+  $("revealAll").disabled=$("hideAll").disabled=$("printBtn").disabled=false;
+}
+$("genWS").addEventListener("click",generateWorksheet);
+$("revealAll").addEventListener("click",()=>document.querySelectorAll(".wans").forEach(x=>x.classList.add("show")));
+$("hideAll").addEventListener("click",()=>document.querySelectorAll(".wans").forEach(x=>x.classList.remove("show")));
+$("printBtn").addEventListener("click",()=>window.print());
+
+window.__MMM_TEST__={genProblem,buildMC,tierSettings};
+newQuestion();
+})();
 </script>
 </body>
 </html>
