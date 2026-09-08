@@ -1,4 +1,6 @@
 
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -178,12 +180,20 @@ function numberLineSVG(p){
     labels+=`<line x1="${x}" y1="${Y-tick/2}" x2="${x}" y2="${Y+tick/2}" stroke="${color}" stroke-width="${v===0?3:2}"/>
     <text x="${x}" y="${Y+28}" text-anchor="middle" font-size="18" fill="${color}" font-weight="${v===0?700:500}">${v}</text>`;
   }
-  const mid=(sX+eX)/2,path=`M ${sX} ${Y-8} Q ${mid} ${Y-34} ${eX} ${Y-8}`;
+  // Use a tall arch like the classroom example, landing on the destination tick.
+  // Keep the large head aligned with the descending end of the arch.
+  const tipY=Y-(p.e===0?8:6),headLength=26,headHalfHeight=14;
+  const ux=dir*0.5,uy=Math.sqrt(3)/2;
+  const baseX=eX-ux*headLength,baseY=tipY-uy*headLength;
+  const corner1X=baseX-uy*headHalfHeight,corner1Y=baseY+ux*headHalfHeight;
+  const corner2X=baseX+uy*headHalfHeight,corner2Y=baseY-ux*headHalfHeight;
+  const span=Math.abs(eX-sX);
+  const path=`M ${sX} ${Y-20} C ${sX+dir*span*0.22} ${Y-94} ${baseX-ux*48} ${baseY-uy*48} ${baseX} ${baseY}`;
   return `<svg width="100%" height="${baseH}" viewBox="0 0 ${baseW} ${baseH}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Number line from ${p.min} to ${p.max} with arrow from ${p.s} to ${p.e}">
     <line x1="${L}" y1="${Y}" x2="${R}" y2="${Y}" stroke="#555" stroke-width="3"/>
     ${labels}
     <path d="${path}" fill="none" stroke="var(--arrow)" stroke-width="5"/>
-    <path d="M ${eX} ${Y-8} l ${dir>=0?-10:10} -5 l 0 10 Z" fill="var(--arrow)"/>
+    <path d="M ${eX} ${tipY} L ${corner1X} ${corner1Y} L ${corner2X} ${corner2Y} Z" fill="var(--arrow)"/>
   </svg>`;
 }
 
